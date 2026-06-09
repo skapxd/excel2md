@@ -105,10 +105,11 @@ D4 (35)
 Cada celda calculada conserva su **fórmula junto al valor** (`22 (=SUM(B2:C2))`),
 la rejilla da las **coordenadas** (`D` por fila, `4` por columna) y el comentario
 `<!--D2-->` permite **ubicar la celda** desde un agente. Al renderizar, los
-comentarios se ocultan y se ve una tabla normal. ¿Quieres la salida más limpia?
+comentarios se ocultan y se ve una tabla normal. ¿Quieres la salida más limpia,
+sin resumen ni coordenadas?
 
 ```bash
-excel2md ventas.xlsx --sin-coordenadas --sin-ref-celdas
+excel2md ventas.xlsx --sin-deps --sin-coordenadas --sin-ref-celdas
 ```
 
 ```markdown
@@ -150,14 +151,14 @@ que necesito: tira lo único que me importa.
 
 El patrón se repite en todas. Todas leen el **valor**, no la fórmula:
 
-| Herramienta | Ecosistema | ¿Conserva fórmulas? | ¿Coordenadas? |
-| --- | --- | --- | --- |
-| MarkItDown | Python | ❌ | ❌ |
-| [`xlsx2md`](https://pypi.org/project/xlsx2md/) | Python | ❌ | ❌ |
-| [`xl2md`](https://pypi.org/project/xl2md/) | Python | ❌ | ❌ |
-| [`excel-to-markdown`](https://github.com/devin-liu/excel-to-markdown) | Python | ❌ | ❌ |
-| [`markdown-tables`](https://github.com/cujarrett/markdown-tables) | npm | ❌ | ❌ |
-| **`@skapxd/excel2md`** | **npm** | **✅** | **✅** |
+| Herramienta | Ecosistema | ¿Fórmulas? | ¿Coordenadas? | ¿Grafo de deps? |
+| --- | --- | --- | --- | --- |
+| MarkItDown | Python | ❌ | ❌ | ❌ |
+| [`xlsx2md`](https://pypi.org/project/xlsx2md/) | Python | ❌ | ❌ | ❌ |
+| [`xl2md`](https://pypi.org/project/xl2md/) | Python | ❌ | ❌ | ❌ |
+| [`excel-to-markdown`](https://github.com/devin-liu/excel-to-markdown) | Python | ❌ | ❌ | ❌ |
+| [`markdown-tables`](https://github.com/cujarrett/markdown-tables) | npm | ❌ | ❌ | ❌ |
+| **`@skapxd/excel2md`** | **npm** | **✅** | **✅** | **✅** |
 
 Y hay un segundo problema que **ninguna** aborda: aunque conservaras las
 fórmulas, estas referencian celdas por coordenada (`D24`, `I18`…). Sin una
@@ -169,9 +170,10 @@ automáticamente cuando hay fórmulas — para que cada referencia sea **rastrea
 ### En resumen
 
 `@skapxd/excel2md` existe para cubrir ese hueco: es el único conversor que, por
-defecto, **preserva la fórmula junto a su valor** (`1500 (=SUM(I19:I22))`) y
-mantiene las **coordenadas reales de Excel** para que la lógica de la hoja siga
-siendo legible y verificable — por un humano o por un modelo.
+defecto, **preserva la fórmula junto a su valor** (`1500 (=SUM(I19:I22))`),
+mantiene las **coordenadas reales de Excel** y **antepone un mapa de
+dependencias** — para que la lógica de la hoja siga siendo legible, navegable y
+verificable, por un humano o por un agente.
 
 ## 🚀 Uso rápido (sin instalar)
 
@@ -215,25 +217,19 @@ excel2md archivo.xlsx -o salida.md
 import { convert } from '@skapxd/excel2md';
 
 const markdown = convert('archivo.xlsx', {
+  deps: true,       // resumen del grafo de dependencias al inicio (default true)
   formulas: true,   // `valor (=FORMULA)` (default)
   coords: null,     // null = auto (coordenadas si hay fórmulas)
   excelFormat: false, // valor crudo (default)
   cellRefs: true,   // comentario <!--B2--> por celda (default true)
 });
+
+// también disponible: dependencySummary(workbook) para solo el grafo.
 ```
 
-### Ejemplo de salida
-
-```markdown
-## Ventas
-
-|  | A | B | C |
-| --- | --- | --- | --- |
-| 1 | Producto | Precio | Total |
-| 2 | Café | 10 | 30 (=B2*3) |
-```
-
-Ahora `=B2*3` es autoexplicativo: `B2 = 10`.
+`convert()` devuelve exactamente lo mismo que el CLI: el resumen de dependencias
+seguido de las tablas. Ver el ejemplo completo en
+[**🖼️ Un vistazo**](#-un-vistazo-de-excel-a-markdown) más arriba.
 
 ## 🏷️ Coordenada por celda para agentes (activado por defecto)
 
@@ -262,10 +258,11 @@ npx @skapxd/excel2md archivo.xlsx --sin-ref-celdas
 
 ## 🤖 Para agentes: cómo buscar en el Markdown
 
-La coordenada al inicio de cada celda convierte el `.md` en algo **consultable
-con herramientas de texto del terminal** (`grep`, `ripgrep`, `awk`), sin cargar
-el archivo entero al contexto. Usa siempre `-o`/`--only-matching` para traer solo
-lo que necesitas.
+**Empieza siempre por el resumen `## 🔗 Dependencias`** del inicio del archivo: te
+dice qué celda depende de cuál antes de leer nada más. Luego, la coordenada al
+inicio de cada celda convierte el `.md` en algo **consultable con herramientas de
+texto del terminal** (`grep`, `ripgrep`, `awk`), sin cargar el archivo entero al
+contexto. Usa siempre `-o`/`--only-matching` para traer solo lo que necesitas.
 
 **Ubicar una celda por coordenada**
 
