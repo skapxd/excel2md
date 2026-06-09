@@ -5,6 +5,18 @@ Todas las novedades relevantes de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
+## [1.2.1] - 2026-06-09
+
+### Documentation
+
+- Subsección **"Cómo leer el grafo"**: explica la flecha `<-` ("depende de") y el
+  concepto de **entradas** (celdas que nadie calcula).
+- Destacado de la intro actualizado: el **mapa de dependencias ya viene en el
+  output**, no es solo una guía manual.
+- Auditoría del README: la opción `deps` en el ejemplo de la API, columna
+  **"¿Grafo de deps?"** en la tabla comparativa, y varios ejemplos sincronizados
+  con el resumen de dependencias (incl. `--sin-deps`).
+
 ## [1.2.0] - 2026-06-09
 
 ### Added
@@ -78,6 +90,7 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
   `--formato-excel`.
 - CLI `excel2md` y API de librería `convert()` / `convertWorkbook()`.
 
+[1.2.1]: https://github.com/skapxd/excel2md/releases/tag/v1.2.1
 [1.2.0]: https://github.com/skapxd/excel2md/releases/tag/v1.2.0
 [1.1.1]: https://github.com/skapxd/excel2md/releases/tag/v1.1.1
 [1.1.0]: https://github.com/skapxd/excel2md/releases/tag/v1.1.0
