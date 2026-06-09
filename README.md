@@ -296,6 +296,25 @@ grep -oE '<!--I19-->[^|]*' archivo.md
 # <!--I19--> #NUM! (=PMT(D24/12,I18,-(D21)))
 ```
 
+**Buscar una celda por su nombre (named range)**
+
+Si la celda es el destino de un named range, lleva su nombre en un segundo
+comentario, así que se busca igual que por coordenada:
+
+```bash
+grep -oE '<!--Rate-->[^|]*' archivo.md
+# <!--Rate--> 0.08 (='RC '!C55)
+```
+
+> **Al leer una celda nombrada**, el texto capturado incluye ese segundo comentario
+> (`<!--C4--> <!--Rate--> 0.08`). Para quedarte solo con el valor, quita los
+> comentarios HTML:
+>
+> ```bash
+> grep -oE '<!--C4-->[^|]*' archivo.md | sed -E 's/<!--[^>]*--> ?//g'
+> # 0.08 (='RC '!C55)
+> ```
+
 **Índice `coordenada → valor` de toda la hoja** (de un solo comando)
 
 ```bash
