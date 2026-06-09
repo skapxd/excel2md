@@ -58,6 +58,37 @@ describe('dependencySummary', () => {
     expect(s).toContain('⟲');
   });
 
+  it('resuelve named ranges a su celda real', () => {
+    const ws: XLSX.WorkSheet = {
+      '!ref': 'A1:C1',
+      A1: { t: 'n', v: 1 },
+      B1: { t: 'n', v: 2 },
+      C1: { t: 'n', v: 3, f: 'Tasa*B1' }, // Tasa es un named range -> A1
+    };
+    const b = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(b, ws, 'H');
+    b.Workbook = { Names: [{ Name: 'Tasa', Ref: "'H'!$A$1" }] };
+    const c1 = dependencySummary(b)
+      .split('\n')
+      .find((l) => l.startsWith('C1 <-'));
+    expect(c1).toContain('A1'); // Tasa resuelto a A1
+    expect(c1).toContain('B1');
+  });
+
+  it('omite las fórmulas que no referencian ninguna celda (=TODAY())', () => {
+    const ws: XLSX.WorkSheet = {
+      '!ref': 'A1:C1',
+      A1: { t: 'n', v: 1 },
+      B1: { t: 'n', f: 'A1+1' },
+      C1: { t: 'n', f: 'TODAY()' },
+    };
+    const b = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(b, ws, 'H');
+    const s = dependencySummary(b);
+    expect(s).toContain('B1 <- A1');
+    expect(s).not.toMatch(/^C1 <-/m); // TODAY() no aporta deps -> se omite
+  });
+
   it('devuelve cadena vacía si no hay fórmulas', () => {
     const ws: XLSX.WorkSheet = { '!ref': 'A1:A1', A1: { t: 's', v: 'hola' } };
     expect(dependencySummary(wb([['H', ws]]))).toBe('');

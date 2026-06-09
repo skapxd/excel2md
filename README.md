@@ -19,8 +19,9 @@ ideal para documentación y **contexto de IA**.
 > referencias de las fórmulas** celda a celda y profundizar a demanda.
 
 - **🔗 Resumen de dependencias:** al inicio del `.md`, un mapa `Celda <- dependencias`
-  agrupado por hoja. Un agente lo carga **primero** y sabe navegar el resto sin
-  leer todo el archivo (`--sin-deps` para omitirlo).
+  agrupado por hoja, que **resuelve los named ranges** a su celda real (`Rate` →
+  `'Tasa Efectiva'!F15`) y detecta ciclos. Un agente lo carga **primero** y sabe
+  navegar el resto sin leer todo el archivo (`--sin-deps` para omitirlo).
 - **Fórmulas:** cada celda calculada se muestra como `valor (=FORMULA)`.
 - **Coordenadas:** rejilla con columnas `A, B, C…` y números de fila de Excel, para
   que referencias como `=PMT(D24/12,I18,…)` se puedan seguir. Se activa
@@ -401,9 +402,11 @@ Con esa lista de aristas el agente puede **seguir cualquier resultado hacia atr�
 hasta sus entradas** sin leer el resto del archivo. Las dependencias **entre
 hojas** salen como `'Hoja'!Celda` (p. ej. `I21 <- 'Seguro de vida'!I20`).
 
-> **Notas:** un rango (`A1:B3`) aparece como sus **esquinas** (`A1 B3`), no
-> expandido celda a celda. Y como las coordenadas se **repiten entre hojas**,
-> para un grafo de **una sola** hoja acótala primero con el `awk` de arriba.
+> **Notas:** este rearmado manual con shell tiene límites que el resumen `🔗`
+> integrado **sí** resuelve: aquí un rango (`A1:B3`) aparece como sus **esquinas**
+> (`A1 B3`) y los **named ranges** (`Rate`, `APR`…) no se capturan (no parecen
+> celdas). El resumen integrado preserva rangos, **resuelve los named ranges** a su
+> celda y califica por hoja. Para una sola hoja, acota primero con el `awk` de arriba.
 
 > ⚠️ **Cuidado con las dependencias circulares.** El grafo **no siempre es
 > acíclico**: Excel permite **referencias circulares** (A depende de B y B de A,

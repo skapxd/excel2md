@@ -5,6 +5,20 @@ Todas las novedades relevantes de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
+## [1.3.0] - 2026-06-09
+
+### Added
+
+- El resumen de dependencias ahora **resuelve los named ranges** (rangos con
+  nombre) a su celda real usando la tabla de nombres del libro: una fórmula como
+  `=PMT(Rate/Pmts_per_year,Npmts,-Loan_amt)` pasa de no mostrar dependencias a
+  `H3 <- C4 C5 C6 C3`. Hojas enteras basadas en nombres dejan de salir vacías.
+
+### Changed
+
+- Se **omiten** del resumen las celdas cuya fórmula no referencia ninguna celda
+  (p. ej. `=TODAY()`, constantes): no aportan navegación y eran ruido.
+
 ## [1.2.1] - 2026-06-09
 
 ### Documentation
@@ -90,6 +104,7 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
   `--formato-excel`.
 - CLI `excel2md` y API de librería `convert()` / `convertWorkbook()`.
 
+[1.3.0]: https://github.com/skapxd/excel2md/releases/tag/v1.3.0
 [1.2.1]: https://github.com/skapxd/excel2md/releases/tag/v1.2.1
 [1.2.0]: https://github.com/skapxd/excel2md/releases/tag/v1.2.0
 [1.1.1]: https://github.com/skapxd/excel2md/releases/tag/v1.1.1

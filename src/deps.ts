@@ -13,21 +13,60 @@ const XLSX = (
 const REF_RE =
   /(?<![A-Za-z0-9_'])(?:('[^']+'|[A-Za-z_][A-Za-z0-9_.]*)!)?(\$?[A-Z]{1,3}\$?[0-9]+(?::\$?[A-Z]{1,3}\$?[0-9]+)?)(?![A-Za-z0-9_(])/g;
 
+// Un identificador que podría ser un named range (no una función ni parte de una celda).
+const NAME_RE = /(?<![\w.!'])([A-Za-z_][\w.]*)(?![\w(!])/g;
+
 function quoteSheet(name: string): string {
   return /^[A-Za-z0-9_]+$/.test(name) ? name : `'${name}'`;
 }
 
-/** Referencias cualificadas `Hoja!Celda` (o `Hoja!Rango`) extraídas de una fórmula. */
-function extractRefs(formula: string, currentSheet: string): string[] {
-  // Descarta literales de texto (no contienen referencias).
-  const f = formula.replace(/"[^"]*"/g, '""');
+/** Resuelve el `Ref` de un named range (`'Hoja'!$F$15`) a `Hoja!F15`. */
+function resolveRefString(ref: string): string | null {
+  const m = ref.match(
+    /(?:('[^']+'|[A-Za-z_][\w.]*)!)?(\$?[A-Z]{1,3}\$?\d+(?::\$?[A-Z]{1,3}\$?\d+)?)/,
+  );
+  if (!m || !m[1]) return null; // sin hoja no se puede calificar
+  const sheet = m[1].replace(/^'|'$/g, '');
+  const cell = (m[2] as string).replace(/\$/g, '');
+  return `${sheet}!${cell}`;
+}
+
+/** Tabla nombre→celda de los named ranges del libro (clave en mayúsculas). */
+function buildNameMap(wb: XLSXStar.WorkBook): Map<string, string> {
+  const map = new Map<string, string>();
+  const names = wb.Workbook?.Names;
+  if (!Array.isArray(names)) return map;
+  for (const n of names) {
+    const name = n.Name;
+    const ref = n.Ref;
+    if (!name || !ref || /[![\]]/.test(name)) continue;
+    const resolved = resolveRefString(ref);
+    if (resolved) map.set(name.toUpperCase(), resolved);
+  }
+  return map;
+}
+
+/** Referencias cualificadas `Hoja!Celda` extraídas de una fórmula (incluye named ranges). */
+function extractRefs(formula: string, currentSheet: string, names: Map<string, string>): string[] {
+  const noStr = formula.replace(/"[^"]*"/g, '""'); // descarta literales de texto
   const out = new Set<string>();
-  for (const m of f.matchAll(REF_RE)) {
-    const cell = (m[2] ?? '').replace(/\$/g, ''); // quita absolutos ($A$1 -> A1)
+
+  // Referencias A1 directas (con prefijo de hoja opcional).
+  for (const m of noStr.matchAll(REF_RE)) {
+    const cell = (m[2] ?? '').replace(/\$/g, ''); // $A$1 -> A1
     if (!cell) continue;
     const rawSheet = m[1];
     const sheet = rawSheet ? rawSheet.replace(/^'|'$/g, '') : currentSheet;
     out.add(`${sheet}!${cell}`);
+  }
+
+  // Named ranges: resuelve cada nombre a su celda real con la tabla del libro.
+  if (names.size) {
+    const noQuotes = noStr.replace(/'[^']*'/g, ''); // ignora los nombres de hoja entre comillas
+    for (const m of noQuotes.matchAll(NAME_RE)) {
+      const resolved = names.get((m[1] as string).toUpperCase());
+      if (resolved) out.add(resolved);
+    }
   }
   return [...out];
 }
@@ -38,6 +77,7 @@ interface Edge {
 }
 
 function buildEdges(wb: XLSXStar.WorkBook): Edge[] {
+  const names = buildNameMap(wb);
   const edges: Edge[] = [];
   for (const sheet of wb.SheetNames) {
     const ws = wb.Sheets[sheet];
@@ -50,8 +90,9 @@ function buildEdges(wb: XLSXStar.WorkBook): Edge[] {
         const cell = ws[addr] as XLSXStar.CellObject | undefined;
         if (cell && typeof cell.f === 'string' && cell.f.length > 0) {
           const src = `${sheet}!${addr}`;
-          const refs = extractRefs(cell.f, sheet).filter((x) => x !== src);
-          edges.push({ src, refs });
+          const refs = extractRefs(cell.f, sheet, names).filter((x) => x !== src);
+          // Omite fórmulas que no dependen de ninguna celda (p. ej. =TODAY()).
+          if (refs.length > 0) edges.push({ src, refs });
         }
       }
     }
