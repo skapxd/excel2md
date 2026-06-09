@@ -54,6 +54,19 @@ describe('convertWorkbook', () => {
     expect(md).not.toContain('<!--');
   });
 
+  it('anota con <!--Nombre--> la celda destino de un named range', () => {
+    const ws: XLSX.WorkSheet = {
+      '!ref': 'A1:B1',
+      A1: { t: 's', v: 'Tasa nominal' },
+      B1: { t: 'n', v: 5 },
+    };
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'H');
+    wb.Workbook = { Names: [{ Name: 'Tasa', Ref: "'H'!$B$1" }] };
+    const md = convertWorkbook(wb);
+    expect(md).toContain('<!--B1--> <!--Tasa-->'); // coordenada + nombre, buscables por separado
+  });
+
   it('incluye el nombre de la hoja como encabezado', () => {
     const md = convertWorkbook(buildWorkbook());
     expect(md).toContain('## Ventas');

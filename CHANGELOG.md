@@ -5,6 +5,17 @@ Todas las novedades relevantes de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
+## [1.4.0] - 2026-06-09
+
+### Added
+
+- La celda que es **destino de un named range** lleva ahora su nombre en un
+  segundo comentario HTML (`<!--C4--> <!--Rate-->`), así que el nombre se busca
+  igual que la coordenada (`grep '<!--Rate-->'`). El `<!--C4-->` se mantiene
+  intacto, no rompe búsquedas existentes. Para nombres que apuntan a un rango se
+  usa la celda ancla.
+- API: `buildCellNameMap(workbook)`.
+
 ## [1.3.0] - 2026-06-09
 
 ### Added
@@ -104,6 +115,7 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
   `--formato-excel`.
 - CLI `excel2md` y API de librería `convert()` / `convertWorkbook()`.
 
+[1.4.0]: https://github.com/skapxd/excel2md/releases/tag/v1.4.0
 [1.3.0]: https://github.com/skapxd/excel2md/releases/tag/v1.3.0
 [1.2.1]: https://github.com/skapxd/excel2md/releases/tag/v1.2.1
 [1.2.0]: https://github.com/skapxd/excel2md/releases/tag/v1.2.0

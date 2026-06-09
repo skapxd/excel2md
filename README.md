@@ -257,6 +257,24 @@ Es **independiente** de la rejilla visible (`coords`): por defecto sale el grid
 npx @skapxd/excel2md archivo.xlsx --sin-ref-celdas
 ```
 
+### Named ranges también buscables
+
+Si una celda es el **destino de un named range**, lleva además su nombre en un
+segundo comentario, así que el nombre se busca igual que la coordenada:
+
+```markdown
+| <!--C4--> <!--Rate--> 0.08 (='RC '!C55) |
+```
+
+```bash
+grep '<!--Rate-->' archivo.md     # cae directo en la celda que ES "Rate"
+grep '<!--C4-->'   archivo.md     # la coordenada sigue funcionando igual
+```
+
+Así, un agente que lee una fórmula como `=Rate/Pmts_per_year` resuelve cada
+nombre con un `grep`, sin necesidad de una leyenda aparte. (Para un nombre que
+apunta a un rango se anota su celda ancla.)
+
 ## 🤖 Para agentes: cómo buscar en el Markdown
 
 **Empieza siempre por el resumen `## 🔗 Dependencias`** del inicio del archivo: te

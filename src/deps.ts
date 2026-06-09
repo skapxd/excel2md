@@ -46,6 +46,27 @@ function buildNameMap(wb: XLSXStar.WorkBook): Map<string, string> {
   return map;
 }
 
+/**
+ * Mapa inverso `Hoja!Celda → nombre` de los named ranges, para anotar en la
+ * tabla la celda que un nombre apunta. Para un rango se usa la celda ancla
+ * (esquina superior izquierda).
+ */
+export function buildCellNameMap(wb: XLSXStar.WorkBook): Map<string, string> {
+  const map = new Map<string, string>();
+  const names = wb.Workbook?.Names;
+  if (!Array.isArray(names)) return map;
+  for (const n of names) {
+    const name = n.Name;
+    const ref = n.Ref;
+    if (!name || !ref || /[![\]]/.test(name)) continue;
+    const resolved = resolveRefString(ref);
+    if (!resolved) continue;
+    const anchor = resolved.split(':')[0] as string; // esquina superior izquierda
+    if (!map.has(anchor)) map.set(anchor, name); // el primer nombre gana
+  }
+  return map;
+}
+
 /** Referencias cualificadas `Hoja!Celda` extraídas de una fórmula (incluye named ranges). */
 function extractRefs(formula: string, currentSheet: string, names: Map<string, string>): string[] {
   const noStr = formula.replace(/"[^"]*"/g, '""'); // descarta literales de texto

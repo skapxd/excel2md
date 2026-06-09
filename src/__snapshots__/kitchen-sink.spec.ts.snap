@@ -21,7 +21,7 @@ B10 <- Aux!A1
 |  | A | B | D |
 | --- | --- | --- | --- |
 | 1 | <!--A1--> Concepto | <!--B1--> Monto | <!--D1--> Nota |
-| 2 | <!--A2--> Precio | <!--B2--> 10 |  |
+| 2 | <!--A2--> Precio | <!--B2--> <!--Precio--> 10 |  |
 | 3 | <!--A3--> Cantidad | <!--B3--> 3 |  |
 | 4 | <!--A4--> Total (form+cache) | <!--B4--> 30 (=B2*B3) |  |
 | 5 | <!--A5--> Formula anidada | <!--B5--> 13 (=IF(B2>5,B2+B3,0)) |  |
@@ -65,7 +65,7 @@ B10 <- Aux!A1
 
 | <!--A1--> Concepto | <!--B1--> Monto | <!--D1--> Nota |
 | --- | --- | --- |
-| <!--A2--> Precio | <!--B2--> 10 |  |
+| <!--A2--> Precio | <!--B2--> <!--Precio--> 10 |  |
 | <!--A3--> Cantidad | <!--B3--> 3 |  |
 | <!--A4--> Total (form+cache) | <!--B4--> 30 (=B2*B3) |  |
 | <!--A5--> Formula anidada | <!--B5--> 13 (=IF(B2>5,B2+B3,0)) |  |
@@ -155,7 +155,7 @@ B10 <- Aux!A1
 |  | A | B | D |
 | --- | --- | --- | --- |
 | 1 | <!--A1--> Concepto | <!--B1--> Monto | <!--D1--> Nota |
-| 2 | <!--A2--> Precio | <!--B2--> 10 |  |
+| 2 | <!--A2--> Precio | <!--B2--> <!--Precio--> 10 |  |
 | 3 | <!--A3--> Cantidad | <!--B3--> 3 |  |
 | 4 | <!--A4--> Total (form+cache) | <!--B4--> 30 |  |
 | 5 | <!--A5--> Formula anidada | <!--B5--> 13 |  |
@@ -200,7 +200,7 @@ B10 <- Aux!A1
 |  | A | B | D |
 | --- | --- | --- | --- |
 | 1 | <!--A1--> Concepto | <!--B1--> Monto | <!--D1--> Nota |
-| 2 | <!--A2--> Precio | <!--B2--> 10 |  |
+| 2 | <!--A2--> Precio | <!--B2--> <!--Precio--> 10 |  |
 | 3 | <!--A3--> Cantidad | <!--B3--> 3 |  |
 | 4 | <!--A4--> Total (form+cache) | <!--B4--> 30 (=B2*B3) |  |
 | 5 | <!--A5--> Formula anidada | <!--B5--> 13 (=IF(B2>5,B2+B3,0)) |  |

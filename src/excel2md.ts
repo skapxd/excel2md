@@ -9,7 +9,7 @@ const XLSX = (
     : (XLSXStar as unknown as { default: typeof XLSXStar }).default
 ) as typeof XLSXStar;
 
-import { dependencySummary } from './deps';
+import { dependencySummary, buildCellNameMap } from './deps';
 
 /** Subconjunto tipado de XLSX.SSF (no siempre expuesto en los tipos). */
 const SSF = (XLSX as unknown as {
@@ -130,7 +130,13 @@ function sheetData(
 }
 
 /** Renderiza las filas a una tabla Markdown, recortando filas/columnas vacías. */
-function renderTable(rows: RowInfo[], coords: boolean, cellRefs: boolean): string {
+function renderTable(
+  rows: RowInfo[],
+  coords: boolean,
+  cellRefs: boolean,
+  sheetName: string,
+  cellNames: Map<string, string>,
+): string {
   const colLetter = new Map<number, string>();
   const nonemptyCols = new Set<number>();
   for (const { cells } of rows) {
@@ -146,14 +152,17 @@ function renderTable(rows: RowInfo[], coords: boolean, cellRefs: boolean): strin
   const textAt = (cells: Map<number, CellInfo>, c: number): string => cells.get(c)?.text ?? '';
 
   // Texto de salida: con cellRefs, antepone `<!--B2--> ` (coordenada A1) a cada
-  // celda no vacía. Va al INICIO para que actúe como ancla/clave en búsquedas de
-  // agente (`grep -oE '<!--B2-->[^|]*'`). El comentario HTML lo ocultan los
-  // renderizadores pero un agente lo lee en el raw.
+  // celda no vacía. Si la celda es el destino de un named range, añade también
+  // `<!--Nombre-->` para que ese nombre sea buscable igual que la coordenada.
+  // Van al INICIO para actuar como ancla en búsquedas de agente; el comentario
+  // HTML lo ocultan los renderizadores pero un agente lo lee en el raw.
   const out = (cells: Map<number, CellInfo>, c: number, rownum: number): string => {
     const text = textAt(cells, c);
     if (cellRefs && text !== '') {
-      const letter = cells.get(c)?.letter ?? colLetter.get(c) ?? '';
-      return `<!--${letter}${rownum}--> ${text}`;
+      const coord = `${cells.get(c)?.letter ?? colLetter.get(c) ?? ''}${rownum}`;
+      const named = cellNames.get(`${sheetName}!${coord}`);
+      const nameComment = named ? ` <!--${named}-->` : '';
+      return `<!--${coord}-->${nameComment} ${text}`;
     }
     return text;
   };
@@ -191,6 +200,7 @@ export function convertWorkbook(wb: XLSXStar.WorkBook, options: ConvertOptions =
   const coordMode = options.coords ?? null;
 
   const parts: string[] = [];
+  const cellNames = cellRefs ? buildCellNameMap(wb) : new Map<string, string>();
 
   // Resumen del grafo de dependencias al inicio (activado por defecto).
   if (options.deps !== false) {
@@ -205,7 +215,7 @@ export function convertWorkbook(wb: XLSXStar.WorkBook, options: ConvertOptions =
     // activa cuando la hoja tiene fórmulas (a menos que el usuario fuerce coords).
     const coords = coordMode === null ? hasFormula : coordMode;
     parts.push(`## ${name}\n`);
-    const table = renderTable(rows, coords, cellRefs);
+    const table = renderTable(rows, coords, cellRefs, name, cellNames);
     parts.push(table ? table + '\n' : '_(hoja vacía)_\n');
   }
   return parts.join('\n').replace(/\s+$/, '') + '\n';

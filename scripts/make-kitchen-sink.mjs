@@ -71,5 +71,8 @@ XLSX.utils.book_append_sheet(wb, cotiz, 'Cotiz');
 XLSX.utils.book_append_sheet(wb, aux, 'Aux');
 XLSX.utils.book_append_sheet(wb, vacia, 'Vacia');
 
+// Named range: la celda B2 también se llama "Precio" -> debe anotarse <!--Precio-->.
+wb.Workbook = { Names: [{ Name: 'Precio', Ref: "'Cotiz'!$B$2" }] };
+
 XLSX.writeFile(wb, outPath, { bookType: 'xlsx' });
 console.log('Fixture escrito:', path.relative(path.join(__dirname, '..'), outPath));
