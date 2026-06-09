@@ -1,4 +1,13 @@
-import * as XLSX from 'xlsx';
+import * as XLSXStar from 'xlsx';
+
+// Interop CJS/ESM: el paquete `xlsx` es CommonJS. Al consumir este paquete como
+// ESM (dist/index.mjs) sus exports quedan bajo `.default`; en CJS están directos.
+// Resolvemos el objeto real para que XLSX.readFile/utils/SSF funcionen en ambos.
+const XLSX = (
+  'readFile' in XLSXStar
+    ? XLSXStar
+    : (XLSXStar as unknown as { default: typeof XLSXStar }).default
+) as typeof XLSXStar;
 
 /** Subconjunto tipado de XLSX.SSF (no siempre expuesto en los tipos). */
 const SSF = (XLSX as unknown as {
@@ -26,6 +35,14 @@ export interface ConvertOptions {
    * @default false
    */
   excelFormat?: boolean;
+  /**
+   * Añade en cada celda no vacía un comentario HTML con su coordenada A1
+   * (p. ej. ` <!--B2-->`). Los renderizadores lo ocultan; un agente puede leerlo
+   * para ubicar y documentar celdas. Activado por defecto; pásalo en `false`
+   * para desactivarlo. Es independiente de `coords` (la rejilla visible).
+   * @default true
+   */
+  cellRefs?: boolean;
 }
 
 interface CellInfo {
@@ -39,7 +56,7 @@ interface RowInfo {
 }
 
 /** Valor crudo de la celda; las fechas se formatean ISO sin depender de la zona horaria. */
-function rawCellValue(cell: XLSX.CellObject): string {
+function rawCellValue(cell: XLSXStar.CellObject): string {
   if (cell.t === 'e') return cell.w != null ? String(cell.w) : ''; // error (#DIV/0!, …)
   const v = cell.v;
   if (v == null) return '';
@@ -50,7 +67,7 @@ function rawCellValue(cell: XLSX.CellObject): string {
 }
 
 /** Texto tal como se ve en Excel (respeta el formato de la celda). */
-function formattedCellValue(cell: XLSX.CellObject): string {
+function formattedCellValue(cell: XLSXStar.CellObject): string {
   if (cell.w != null) return String(cell.w);
   if (cell.v != null) return String(cell.v);
   return '';
@@ -58,7 +75,7 @@ function formattedCellValue(cell: XLSX.CellObject): string {
 
 /** Texto Markdown de una celda, escapando pipes y saltos de línea. */
 function cellToMarkdown(
-  cell: XLSX.CellObject | undefined,
+  cell: XLSXStar.CellObject | undefined,
   formulas: boolean,
   excelFormat: boolean,
 ): string {
@@ -77,7 +94,7 @@ function cellToMarkdown(
 }
 
 function sheetData(
-  ws: XLSX.WorkSheet,
+  ws: XLSXStar.WorkSheet,
   formulas: boolean,
   excelFormat: boolean,
 ): { rows: RowInfo[]; hasFormula: boolean } {
@@ -91,7 +108,7 @@ function sheetData(
   for (let r = 0; r <= range.e.r; r++) {
     const cells = new Map<number, CellInfo>();
     for (let c = 0; c <= range.e.c; c++) {
-      const cell = ws[XLSX.utils.encode_cell({ r, c })] as XLSX.CellObject | undefined;
+      const cell = ws[XLSX.utils.encode_cell({ r, c })] as XLSXStar.CellObject | undefined;
       if (cell && typeof cell.f === 'string' && cell.f.length > 0) hasFormula = true;
       cells.set(c, {
         letter: XLSX.utils.encode_col(c),
@@ -104,7 +121,7 @@ function sheetData(
 }
 
 /** Renderiza las filas a una tabla Markdown, recortando filas/columnas vacías. */
-function renderTable(rows: RowInfo[], coords: boolean): string {
+function renderTable(rows: RowInfo[], coords: boolean, cellRefs: boolean): string {
   const colLetter = new Map<number, string>();
   const nonemptyCols = new Set<number>();
   for (const { cells } of rows) {
@@ -119,6 +136,19 @@ function renderTable(rows: RowInfo[], coords: boolean): string {
 
   const textAt = (cells: Map<number, CellInfo>, c: number): string => cells.get(c)?.text ?? '';
 
+  // Texto de salida: con cellRefs, antepone `<!--B2--> ` (coordenada A1) a cada
+  // celda no vacía. Va al INICIO para que actúe como ancla/clave en búsquedas de
+  // agente (`grep -oE '<!--B2-->[^|]*'`). El comentario HTML lo ocultan los
+  // renderizadores pero un agente lo lee en el raw.
+  const out = (cells: Map<number, CellInfo>, c: number, rownum: number): string => {
+    const text = textAt(cells, c);
+    if (cellRefs && text !== '') {
+      const letter = cells.get(c)?.letter ?? colLetter.get(c) ?? '';
+      return `<!--${letter}${rownum}--> ${text}`;
+    }
+    return text;
+  };
+
   const kept = rows.filter(({ cells }) => cols.some((c) => textAt(cells, c) !== ''));
   if (kept.length === 0) return '';
 
@@ -128,23 +158,27 @@ function renderTable(rows: RowInfo[], coords: boolean): string {
     lines.push('| ' + header.join(' | ') + ' |');
     lines.push('| ' + Array(cols.length + 1).fill('---').join(' | ') + ' |');
     for (const { rownum, cells } of kept) {
-      const row = [String(rownum), ...cols.map((c) => textAt(cells, c))];
+      const row = [String(rownum), ...cols.map((c) => out(cells, c, rownum))];
       lines.push('| ' + row.join(' | ') + ' |');
     }
   } else {
-    const body = kept.map(({ cells }) => cols.map((c) => textAt(cells, c)));
-    const [header, ...rest] = body;
-    lines.push('| ' + (header ?? []).join(' | ') + ' |');
+    const [headerRow, ...rest] = kept;
+    if (!headerRow) return '';
+    const header = cols.map((c) => out(headerRow.cells, c, headerRow.rownum));
+    lines.push('| ' + header.join(' | ') + ' |');
     lines.push('| ' + Array(cols.length).fill('---').join(' | ') + ' |');
-    for (const r of rest) lines.push('| ' + r.join(' | ') + ' |');
+    for (const { cells, rownum } of rest) {
+      lines.push('| ' + cols.map((c) => out(cells, c, rownum)).join(' | ') + ' |');
+    }
   }
   return lines.join('\n');
 }
 
 /** Convierte un workbook ya cargado (SheetJS) a Markdown. */
-export function convertWorkbook(wb: XLSX.WorkBook, options: ConvertOptions = {}): string {
+export function convertWorkbook(wb: XLSXStar.WorkBook, options: ConvertOptions = {}): string {
   const formulas = options.formulas !== false;
   const excelFormat = options.excelFormat === true;
+  const cellRefs = options.cellRefs !== false; // activado por defecto
   const coordMode = options.coords ?? null;
 
   const parts: string[] = [];
@@ -152,9 +186,11 @@ export function convertWorkbook(wb: XLSX.WorkBook, options: ConvertOptions = {})
     const ws = wb.Sheets[name];
     if (!ws) continue;
     const { rows, hasFormula } = sheetData(ws, formulas, excelFormat);
+    // La rejilla visible es independiente de los comentarios: por defecto se
+    // activa cuando la hoja tiene fórmulas (a menos que el usuario fuerce coords).
     const coords = coordMode === null ? hasFormula : coordMode;
     parts.push(`## ${name}\n`);
-    const table = renderTable(rows, coords);
+    const table = renderTable(rows, coords, cellRefs);
     parts.push(table ? table + '\n' : '_(hoja vacía)_\n');
   }
   return parts.join('\n').replace(/\s+$/, '') + '\n';

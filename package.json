@@ -1,6 +1,6 @@
 {
   "name": "@skapxd/excel2md",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Convert Excel (.xlsx/.xlsm) to Markdown preserving formulas and cell coordinates",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -18,7 +18,9 @@
     "test:ui": "vitest --ui -c vitest.unit.config.ts",
     "test:coverage": "vitest run --coverage -c vitest.unit.config.ts",
     "typecheck": "tsc --noEmit",
-    "start": "node dist/cli.cjs"
+    "start": "node dist/cli.cjs",
+    "fixture:make": "node scripts/make-kitchen-sink.mjs",
+    "canary:local": "node scripts/canary-local.mjs"
   },
   "keywords": [
     "excel",

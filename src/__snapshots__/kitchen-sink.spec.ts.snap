@@ -1,0 +1,150 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`kitchen-sink (golden snapshot) > --formato-excel — texto formateado de Excel 1`] = `
+"## Cotiz
+
+|  | A | B | D |
+| --- | --- | --- | --- |
+| 1 | <!--A1--> Concepto | <!--B1--> Monto | <!--D1--> Nota |
+| 2 | <!--A2--> Precio | <!--B2--> 10 |  |
+| 3 | <!--A3--> Cantidad | <!--B3--> 3 |  |
+| 4 | <!--A4--> Total (form+cache) | <!--B4--> 30 (=B2*B3) |  |
+| 5 | <!--A5--> Formula anidada | <!--B5--> 13 (=IF(B2>5,B2+B3,0)) |  |
+| 6 | <!--A6--> Porcentaje | <!--B6--> 1.00% |  |
+| 7 | <!--A7--> Fecha | <!--B7--> 2024-04-01 |  |
+| 8 | <!--A8--> Error | <!--B8--> #DIV/0! (=B2/0) |  |
+| 9 | <!--A9--> Booleano | <!--B9--> TRUE |  |
+| 10 | <!--A10--> Entre hojas | <!--B10--> 99 (=Aux!A1) |  |
+| 11 | <!--A11--> Pipe\\|en\\|texto | <!--B11--> a\\|b\\|c |  |
+| 12 | <!--A12--> Multilinea | <!--B12--> linea1<br>linea2 |  |
+| 14 | <!--A14--> PIE DE TABLA (merged) |  |  |
+
+## Aux
+
+| <!--A1--> 99 |
+| --- |
+
+## Vacia
+
+_(hoja vacía)_
+"
+`;
+
+exports[`kitchen-sink (golden snapshot) > --sin-coordenadas — primera fila como header 1`] = `
+"## Cotiz
+
+| <!--A1--> Concepto | <!--B1--> Monto | <!--D1--> Nota |
+| --- | --- | --- |
+| <!--A2--> Precio | <!--B2--> 10 |  |
+| <!--A3--> Cantidad | <!--B3--> 3 |  |
+| <!--A4--> Total (form+cache) | <!--B4--> 30 (=B2*B3) |  |
+| <!--A5--> Formula anidada | <!--B5--> 13 (=IF(B2>5,B2+B3,0)) |  |
+| <!--A6--> Porcentaje | <!--B6--> 0.01 |  |
+| <!--A7--> Fecha | <!--B7--> 2024-04-01 00:00:00 |  |
+| <!--A8--> Error | <!--B8--> #DIV/0! (=B2/0) |  |
+| <!--A9--> Booleano | <!--B9--> true |  |
+| <!--A10--> Entre hojas | <!--B10--> 99 (=Aux!A1) |  |
+| <!--A11--> Pipe\\|en\\|texto | <!--B11--> a\\|b\\|c |  |
+| <!--A12--> Multilinea | <!--B12--> linea1<br>linea2 |  |
+| <!--A14--> PIE DE TABLA (merged) |  |  |
+
+## Aux
+
+| <!--A1--> 99 |
+| --- |
+
+## Vacia
+
+_(hoja vacía)_
+"
+`;
+
+exports[`kitchen-sink (golden snapshot) > --sin-ref-celdas — sin comentarios de coordenada 1`] = `
+"## Cotiz
+
+|  | A | B | D |
+| --- | --- | --- | --- |
+| 1 | Concepto | Monto | Nota |
+| 2 | Precio | 10 |  |
+| 3 | Cantidad | 3 |  |
+| 4 | Total (form+cache) | 30 (=B2*B3) |  |
+| 5 | Formula anidada | 13 (=IF(B2>5,B2+B3,0)) |  |
+| 6 | Porcentaje | 0.01 |  |
+| 7 | Fecha | 2024-04-01 00:00:00 |  |
+| 8 | Error | #DIV/0! (=B2/0) |  |
+| 9 | Booleano | true |  |
+| 10 | Entre hojas | 99 (=Aux!A1) |  |
+| 11 | Pipe\\|en\\|texto | a\\|b\\|c |  |
+| 12 | Multilinea | linea1<br>linea2 |  |
+| 14 | PIE DE TABLA (merged) |  |  |
+
+## Aux
+
+| 99 |
+| --- |
+
+## Vacia
+
+_(hoja vacía)_
+"
+`;
+
+exports[`kitchen-sink (golden snapshot) > --solo-valores — sin fórmulas 1`] = `
+"## Cotiz
+
+|  | A | B | D |
+| --- | --- | --- | --- |
+| 1 | <!--A1--> Concepto | <!--B1--> Monto | <!--D1--> Nota |
+| 2 | <!--A2--> Precio | <!--B2--> 10 |  |
+| 3 | <!--A3--> Cantidad | <!--B3--> 3 |  |
+| 4 | <!--A4--> Total (form+cache) | <!--B4--> 30 |  |
+| 5 | <!--A5--> Formula anidada | <!--B5--> 13 |  |
+| 6 | <!--A6--> Porcentaje | <!--B6--> 0.01 |  |
+| 7 | <!--A7--> Fecha | <!--B7--> 2024-04-01 00:00:00 |  |
+| 8 | <!--A8--> Error | <!--B8--> #DIV/0! |  |
+| 9 | <!--A9--> Booleano | <!--B9--> true |  |
+| 10 | <!--A10--> Entre hojas | <!--B10--> 99 |  |
+| 11 | <!--A11--> Pipe\\|en\\|texto | <!--B11--> a\\|b\\|c |  |
+| 12 | <!--A12--> Multilinea | <!--B12--> linea1<br>linea2 |  |
+| 14 | <!--A14--> PIE DE TABLA (merged) |  |  |
+
+## Aux
+
+| <!--A1--> 99 |
+| --- |
+
+## Vacia
+
+_(hoja vacía)_
+"
+`;
+
+exports[`kitchen-sink (golden snapshot) > default — fórmulas + coordenadas auto + valor crudo 1`] = `
+"## Cotiz
+
+|  | A | B | D |
+| --- | --- | --- | --- |
+| 1 | <!--A1--> Concepto | <!--B1--> Monto | <!--D1--> Nota |
+| 2 | <!--A2--> Precio | <!--B2--> 10 |  |
+| 3 | <!--A3--> Cantidad | <!--B3--> 3 |  |
+| 4 | <!--A4--> Total (form+cache) | <!--B4--> 30 (=B2*B3) |  |
+| 5 | <!--A5--> Formula anidada | <!--B5--> 13 (=IF(B2>5,B2+B3,0)) |  |
+| 6 | <!--A6--> Porcentaje | <!--B6--> 0.01 |  |
+| 7 | <!--A7--> Fecha | <!--B7--> 2024-04-01 00:00:00 |  |
+| 8 | <!--A8--> Error | <!--B8--> #DIV/0! (=B2/0) |  |
+| 9 | <!--A9--> Booleano | <!--B9--> true |  |
+| 10 | <!--A10--> Entre hojas | <!--B10--> 99 (=Aux!A1) |  |
+| 11 | <!--A11--> Pipe\\|en\\|texto | <!--B11--> a\\|b\\|c |  |
+| 12 | <!--A12--> Multilinea | <!--B12--> linea1<br>linea2 |  |
+| 14 | <!--A14--> PIE DE TABLA (merged) |  |  |
+
+## Aux
+
+| <!--A1--> 99 |
+| --- |
+
+## Vacia
+
+_(hoja vacía)_
+"
+`;

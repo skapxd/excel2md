@@ -38,9 +38,20 @@ describe('convertWorkbook', () => {
   });
 
   it('--sin-coordenadas usa la primera fila como header', () => {
-    const md = convertWorkbook(buildWorkbook(), { coords: false });
+    const md = convertWorkbook(buildWorkbook(), { coords: false, cellRefs: false });
     expect(md).toContain('| Producto | Precio | Total |');
     expect(md).not.toContain('| A | B | C |');
+  });
+
+  it('por defecto embebe el comentario de coordenada al inicio de cada celda', () => {
+    const md = convertWorkbook(buildWorkbook());
+    expect(md).toContain('<!--A2-->');
+    expect(md).toContain('<!--C2--> 30 (=B2*3)');
+  });
+
+  it('cellRefs:false desactiva los comentarios de coordenada', () => {
+    const md = convertWorkbook(buildWorkbook(), { cellRefs: false });
+    expect(md).not.toContain('<!--');
   });
 
   it('incluye el nombre de la hoja como encabezado', () => {
@@ -99,6 +110,35 @@ describe('convertWorkbook', () => {
     const wb = XLSX.utils.book_new();
     wb.SheetNames.push('Ghost'); // nombre sin entrada en wb.Sheets
     expect(() => convertWorkbook(wb)).not.toThrow();
+  });
+
+  it('comentarios + --sin-coordenadas: render limpio con la coordenada al inicio', () => {
+    const md = convertWorkbook(buildWorkbook(), { coords: false });
+    // Comentario (al inicio) con la coordenada en una celda con contenido
+    expect(md).toContain('<!--A2--> Café');
+    expect(md).toContain('<!--C2--> 30 (=B2*3)');
+    // Primera fila como header (sin rejilla visible)
+    expect(md).toContain('| <!--A1--> Producto | <!--B1--> Precio | <!--C1--> Total |');
+    expect(md).not.toMatch(/\|\s*\|\s*A\s*\|\s*B\s*\|\s*C\s*\|/);
+  });
+
+  it('--ref-celdas no anota celdas vacías (conserva el recorte)', () => {
+    const ws: XLSX.WorkSheet = {
+      '!ref': 'A1:B1',
+      A1: { t: 's', v: 'X' },
+      // B1 vacía
+    };
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'H');
+    const md = convertWorkbook(wb, { cellRefs: true });
+    expect(md).toContain('<!--A1--> X');
+    expect(md).not.toContain('<!--B1-->'); // la columna vacía se recorta, sin comentario
+  });
+
+  it('--ref-celdas + --coordenadas combina rejilla y comentarios', () => {
+    const md = convertWorkbook(buildWorkbook(), { cellRefs: true, coords: true });
+    expect(md).toContain('| A | B | C |'); // rejilla visible
+    expect(md).toContain('<!--A2--> Café'); // y comentario al inicio
   });
 
   it('--formato-excel cae al valor crudo si la celda no tiene texto formateado', () => {

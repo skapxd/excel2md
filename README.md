@@ -86,6 +86,7 @@ npx @skapxd/excel2md archivo.xlsx -o salida.md
 | `--coordenadas` | Forzar la rejilla de coordenadas en todas las hojas. |
 | `--sin-coordenadas` | Nunca mostrar coordenadas (la primera fila se usa como header). |
 | `--formato-excel` | Usar el texto formateado de Excel (`1.00%`, `Apr-24`) en vez del valor crudo (`0.01`). |
+| `--sin-ref-celdas` | Desactiva el comentario de coordenada A1 por celda (`<!--B2-->`), que viene **activado por defecto**. |
 
 ## 📦 Uso como librería
 
@@ -96,6 +97,7 @@ const markdown = convert('archivo.xlsx', {
   formulas: true,   // `valor (=FORMULA)` (default)
   coords: null,     // null = auto (coordenadas si hay fórmulas)
   excelFormat: false, // valor crudo (default)
+  cellRefs: true,   // comentario <!--B2--> por celda (default true)
 });
 ```
 
@@ -111,6 +113,119 @@ const markdown = convert('archivo.xlsx', {
 ```
 
 Ahora `=B2*3` es autoexplicativo: `B2 = 10`.
+
+## 🏷️ Coordenada por celda para agentes (activado por defecto)
+
+**Por defecto**, cada celda lleva su coordenada A1 embebida **al inicio** en un
+**comentario HTML** (`<!--B2-->`): los renderizadores lo ocultan, pero un
+**agente/LLM** lo lee en el raw para ubicar y documentar celdas sin tener que
+cruzar la fila y la columna de la rejilla.
+
+```markdown
+## Ventas
+
+| <!--A2--> Café | <!--B2--> 10 | <!--C2--> 30 (=B2*3) |
+```
+
+Un agente que lee `<!--C2--> 30 (=B2*3)` sabe que la fórmula está en `C2` y que
+referencia `B2` — que localiza buscando `<!--B2-->`. La coordenada va **al
+inicio** a propósito: funciona como ancla para extraerla con herramientas de
+texto (ver más abajo).
+
+Es **independiente** de la rejilla visible (`coords`): por defecto sale el grid
+(si hay fórmulas) **y** los comentarios. Para desactivar los comentarios:
+
+```bash
+npx @skapxd/excel2md archivo.xlsx --sin-ref-celdas
+```
+
+## 🤖 Para agentes: cómo buscar en el Markdown
+
+La coordenada al inicio de cada celda convierte el `.md` en algo **consultable
+con herramientas de texto del terminal** (`grep`, `ripgrep`, `awk`), sin cargar
+el archivo entero al contexto. Usa siempre `-o`/`--only-matching` para traer solo
+lo que necesitas.
+
+**Ubicar una celda por coordenada**
+
+```bash
+grep -n '<!--I19-->' archivo.md          # en qué línea/fila está I19
+```
+
+**Leer solo el valor de una celda** (mínimo contexto)
+
+```bash
+grep -oE '<!--I19-->[^|]*' archivo.md
+# <!--I19--> #NUM! (=PMT(D24/12,I18,-(D21)))
+```
+
+**Índice `coordenada → valor` de toda la hoja** (de un solo comando)
+
+```bash
+grep -oE '<!--[A-Z]+[0-9]+-->[^|]*' archivo.md
+# <!--A1--> Concepto
+# <!--B4--> 30 (=B2*B3)
+# ...
+```
+
+**Seguir las referencias de una fórmula**
+
+La celda `<!--I19--> ... (=PMT(D24/12,I18,...))` referencia `D24` e `I18`.
+Búscalas por su marcador:
+
+```bash
+grep -oE '<!--D24-->[^|]*' archivo.md
+grep -oE '<!--I18-->[^|]*' archivo.md
+```
+
+**Listar solo las celdas con fórmula**
+
+```bash
+grep -oE '<!--[A-Z]+[0-9]+-->[^|]*\(=[^|]*' archivo.md
+# <!--B4--> 30 (=B2*B3)
+# <!--B8--> #DIV/0! (=B2/0)
+```
+
+> `ripgrep` (`rg`) acepta los mismos patrones y es más rápido en archivos
+> grandes. Cada `[^|]*` se detiene en el siguiente `|`, así que captura el valor
+> de **una sola** celda.
+
+**Ojo con las hojas:** una coordenada (`I19`) es única **dentro de una hoja**,
+pero se repite entre hojas. Cada hoja empieza con un encabezado `## NombreHoja`.
+Para acotar la búsqueda a una hoja, usa el rango entre encabezados:
+
+```bash
+# solo la hoja "COTIZADOR-Vivienda (Interna)"
+awk '/^## /{on=$0=="## COTIZADOR-Vivienda (Interna)"} on' archivo.md \
+  | grep -oE '<!--I19-->[^|]*'
+```
+
+### Referencias entre hojas
+
+Una fórmula puede referenciar una celda de **otra hoja**, con la forma
+`Hoja!Celda` (o `'Hoja con espacios'!Celda`). En el raw lo verás así:
+
+```
+<!--H21--> #VALUE! (='Seguro de vida'!I20)
+```
+
+Para resolver `'Seguro de vida'!I20`:
+
+1. **Nombre de hoja** = lo de antes del `!`. Quítale las comillas simples si las
+   tiene (`'Seguro de vida'` → `Seguro de vida`); el encabezado en el Markdown va
+   **sin** comillas: `## Seguro de vida`.
+2. **Celda** = lo de después del `!`. Quítale los `$` de las referencias absolutas
+   (`$C$20` → `C20`); un rango (`C20:D42`) abarca varias celdas.
+3. Acota a esa hoja y busca la celda:
+
+```bash
+awk '/^## /{on=$0=="## Seguro de vida"} on' archivo.md | grep -oE '<!--I20-->[^|]*'
+# <!--I20--> 558.6 (=H20+G20)
+```
+
+La celda destino puede tener **su propia fórmula**, así que puedes encadenar la
+búsqueda para seguir el cálculo de hoja en hoja. Para listar todas las hojas:
+`grep -E '^## ' archivo.md`.
 
 ## Notas sobre los valores cacheados
 

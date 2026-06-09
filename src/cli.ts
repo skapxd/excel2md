@@ -25,6 +25,7 @@ program
   .option('--coordenadas', 'Forzar rejilla de coordenadas (A,B,C / 1,2,3) en todas las hojas')
   .option('--sin-coordenadas', 'Nunca mostrar coordenadas (primera fila como header)')
   .option('--formato-excel', 'Usar el texto formateado de Excel en vez del valor crudo')
+  .option('--sin-ref-celdas', 'No embeber la coordenada A1 de cada celda (por defecto se embebe en <!--B2-->)')
   .action((file: string, options) => {
     let coords: boolean | null = null;
     if (options.coordenadas) coords = true;
@@ -34,6 +35,7 @@ program
       formulas: !options.soloValores,
       coords,
       excelFormat: Boolean(options.formatoExcel),
+      cellRefs: !options.sinRefCeldas,
     };
 
     let md: string;
