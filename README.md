@@ -77,6 +77,23 @@ npx @skapxd/excel2md archivo.xlsx
 npx @skapxd/excel2md archivo.xlsx -o salida.md
 ```
 
+## 📥 Instalación global (comando `excel2md`)
+
+Si lo vas a usar seguido, instálalo una vez de forma global y olvídate de `npx`:
+
+```bash
+npm install -g @skapxd/excel2md
+# o:  pnpm add -g @skapxd/excel2md
+# o:  yarn global add @skapxd/excel2md
+```
+
+Después lo invocas directo:
+
+```bash
+excel2md archivo.xlsx
+excel2md archivo.xlsx -o salida.md
+```
+
 ## Opciones
 
 | Flag | Descripción |
