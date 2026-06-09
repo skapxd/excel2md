@@ -344,6 +344,23 @@ hojas** salen como `'Hoja'!Celda` (p. ej. `I21 <- 'Seguro de vida'!I20`).
 > expandido celda a celda. Y como las coordenadas se **repiten entre hojas**,
 > para un grafo de **una sola** hoja acótala primero con el `awk` de arriba.
 
+> ⚠️ **Cuidado con las dependencias circulares.** El grafo **no siempre es
+> acíclico**: Excel permite **referencias circulares** (A depende de B y B de A,
+> o una celda de sí misma) cuando está activo el cálculo iterativo. Si recorres el
+> grafo hacia atrás, **lleva un conjunto de celdas ya visitadas y corta al repetir
+> una** — de lo contrario entras en un **bucle infinito**. Para marcar las
+> auto-referencias directas en la lista de aristas:
+>
+> ```bash
+> # (sobre la salida de "SRC <- deps")
+> awk '{ for (i=3; i<=NF; i++) if ($i==$1) { print "posible ciclo:", $0; break } }'
+> ```
+>
+> Pero **verifica antes de concluir**: una referencia a un **rango de otra hoja**
+> (`'Hoja'!$A$1:$H$30`) pierde el prefijo de hoja en su esquina final, así que
+> puede *aparentar* un ciclo (`H30 <- … H30`) sin serlo. Confirma la hoja real de
+> cada extremo antes de darlo por circular.
+
 ## Notas sobre los valores cacheados
 
 El valor que acompaña a la fórmula es el **último resultado que Excel guardó en
