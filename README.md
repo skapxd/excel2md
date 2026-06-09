@@ -402,8 +402,10 @@ para entender la hoja y de qué depende cada cálculo.
 `coordenada<TAB>contenido` y filtra:
 
 ```bash
-# base reutilizable
-cells() { grep -oE '<!--[A-Z]+[0-9]+-->[^|]*' "$1" | sed -E 's/<!--([A-Z]+[0-9]+)--> ?/\1\t/'; }
+# base reutilizable. El 2º `s/...` quita el comentario de nombre de una celda
+# nombrada (<!--Rate-->), si no la clasificación por número/texto se rompería.
+cells() { grep -oE '<!--[A-Z]+[0-9]+-->[^|]*' "$1" \
+  | sed -E 's/<!--([A-Z]+[0-9]+)--> ?/\1\t/; s/<!--[^>]*--> ?//g'; }
 
 cells archivo.md | grep    '(='                         # FÓRMULAS  (cálculos)
 cells archivo.md | grep -v '(=' | grep -E  '\t-?[0-9]'  # VALORES   (números de entrada)
