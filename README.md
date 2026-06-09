@@ -294,6 +294,56 @@ La celda destino puede tener **su propia fórmula**, así que puedes encadenar l
 búsqueda para seguir el cálculo de hoja en hoja. Para listar todas las hojas:
 `grep -E '^## ' archivo.md`.
 
+### Playbook: clasificar celdas y reconstruir el grafo de dependencias
+
+En vez de leer todo el `.md`, un agente puede ejecutar estos comandos **en orden**
+para entender la hoja y de qué depende cada cálculo.
+
+**1) Clasificar cada celda** en texto / valor / fórmula. Normaliza a
+`coordenada<TAB>contenido` y filtra:
+
+```bash
+# base reutilizable
+cells() { grep -oE '<!--[A-Z]+[0-9]+-->[^|]*' "$1" | sed -E 's/<!--([A-Z]+[0-9]+)--> ?/\1\t/'; }
+
+cells archivo.md | grep    '(='                         # FÓRMULAS  (cálculos)
+cells archivo.md | grep -v '(=' | grep -E  '\t-?[0-9]'  # VALORES   (números de entrada)
+cells archivo.md | grep -v '(=' | grep -vE '\t-?[0-9]'  # TEXTO     (etiquetas)
+```
+
+Las celdas **sin** `(=` (texto y valor) son las **entradas** del cálculo; las de
+**fórmula** son los nodos que dependen de otras.
+
+**2) Reconstruir el grafo de dependencias** — para cada fórmula, a qué celdas
+referencia (`SRC <- deps`):
+
+```bash
+grep -oE '<!--[A-Z]+[0-9]+-->[^|]*\(=[^|]*' archivo.md | while IFS= read -r line; do
+  src=$(printf '%s' "$line" | sed -E 's/^<!--([A-Z]+[0-9]+)-->.*/\1/')
+  deps=$(printf '%s' "$line" | sed -E 's/^[^(]*\(=//' | tr -d '$' \
+    | grep -oE "('[^']+'!)?[A-Z]+[0-9]+" | sort -u | paste -sd' ' -)
+  echo "$src <- $deps"
+done
+```
+
+Sobre `ventas.xlsx`:
+
+```
+D2 <- B2 C2
+D3 <- B3 C3
+B4 <- B2 B3
+C4 <- C2 C3
+D4 <- D2 D3     # D4 depende de D2 y D3, que a su vez dependen de B2 C2 / B3 C3
+```
+
+Con esa lista de aristas el agente puede **seguir cualquier resultado hacia atrás
+hasta sus entradas** sin leer el resto del archivo. Las dependencias **entre
+hojas** salen como `'Hoja'!Celda` (p. ej. `I21 <- 'Seguro de vida'!I20`).
+
+> **Notas:** un rango (`A1:B3`) aparece como sus **esquinas** (`A1 B3`), no
+> expandido celda a celda. Y como las coordenadas se **repiten entre hojas**,
+> para un grafo de **una sola** hoja acótala primero con el `awk` de arriba.
+
 ## Notas sobre los valores cacheados
 
 El valor que acompaña a la fórmula es el **último resultado que Excel guardó en
