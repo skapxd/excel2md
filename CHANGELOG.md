@@ -5,6 +5,17 @@ Todas las novedades relevantes de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
+## [1.1.1] - 2026-06-09
+
+### Documentation
+
+- Sección **"Un vistazo: de Excel a Markdown"** con un ejemplo simple (sumas por
+  fila y por columna) y la salida real de la herramienta, para entenderla sin
+  descargar nada.
+- Instrucciones de **instalación global** (`npm i -g @skapxd/excel2md` → comando
+  `excel2md`).
+- Primer `CHANGELOG`.
+
 ## [1.1.0] - 2026-06-09
 
 ### Added
@@ -50,5 +61,6 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
   `--formato-excel`.
 - CLI `excel2md` y API de librería `convert()` / `convertWorkbook()`.
 
+[1.1.1]: https://github.com/skapxd/excel2md/releases/tag/v1.1.1
 [1.1.0]: https://github.com/skapxd/excel2md/releases/tag/v1.1.0
 [1.0.0]: https://github.com/skapxd/excel2md/releases/tag/v1.0.0
