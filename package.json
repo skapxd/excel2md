@@ -1,0 +1,52 @@
+{
+  "name": "@skapxd/excel2md",
+  "version": "1.0.0",
+  "description": "Convert Excel (.xlsx/.xlsm) to Markdown preserving formulas and cell coordinates",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "excel2md": "./dist/cli.cjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run -c vitest.unit.config.ts",
+    "test:ui": "vitest --ui -c vitest.unit.config.ts",
+    "test:coverage": "vitest run --coverage -c vitest.unit.config.ts",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/cli.cjs"
+  },
+  "keywords": [
+    "excel",
+    "xlsx",
+    "markdown",
+    "formula",
+    "converter",
+    "cli",
+    "spreadsheet",
+    "ai-context"
+  ],
+  "author": "skapxd",
+  "license": "MIT",
+  "packageManager": "pnpm@11.2.2",
+  "dependencies": {
+    "commander": "14.0.2",
+    "xlsx": "0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.10",
+    "@vitest/coverage-v8": "4.0.17",
+    "@vitest/ui": "4.0.17",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skapxd/excel2md"
+  }
+}
