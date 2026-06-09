@@ -10,11 +10,13 @@ A diferencia de la mayoría de conversores (que aplanan cada fórmula a su valor
 `excel2md` preserva la lógica de cálculo de la hoja y la hace **rastreable**,
 ideal para documentación y **contexto de IA**.
 
-> **No es solo un conversor.** Este README también incluye una
+> **No es solo un conversor.** El Markdown que genera **empieza con un mapa de
+> dependencias** (`Celda <- dependencias`, calificado por hoja e incluso **entre
+> hojas**) para que un agente lo cargue **primero** y navegue el resto sin leer
+> todo el archivo. Además, este README trae una
 > [**guía para agentes**](#-para-agentes-cómo-buscar-en-el-markdown) con
-> herramientas de terminal (`grep`, `ripgrep`, `awk`) para que un agente
-> **siga las referencias de las fórmulas** —celda a celda e incluso **entre
-> hojas**— en hojas de cálculo complejas, sin cargar todo el archivo al contexto.
+> herramientas de terminal (`grep`, `ripgrep`, `awk`) para **seguir las
+> referencias de las fórmulas** celda a celda y profundizar a demanda.
 
 - **🔗 Resumen de dependencias:** al inicio del `.md`, un mapa `Celda <- dependencias`
   agrupado por hoja. Un agente lo carga **primero** y sabe navegar el resto sin
