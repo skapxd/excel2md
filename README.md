@@ -18,6 +18,50 @@ ideal para documentación y **contexto de IA**.
   coordenadas reales de Excel.
 - **Multi-hoja:** un encabezado `## NombreHoja` por cada hoja del libro.
 
+## 🖼️ Un vistazo: de Excel a Markdown
+
+**El Excel** (`ventas.xlsx`) — con sumas por fila (columna `D`) y por columna
+(fila `4`):
+
+|     | A        | B           | C           | D           |
+| --- | -------- | ----------- | ----------- | ----------- |
+| **1** | Producto | Ene         | Feb         | Total       |
+| **2** | Café     | 10          | 12          | `=SUM(B2:C2)` |
+| **3** | Té       | 5           | 8           | `=SUM(B3:C3)` |
+| **4** | Total    | `=SUM(B2:B3)` | `=SUM(C2:C3)` | `=SUM(D2:D3)` |
+
+**Lo que genera `excel2md ventas.xlsx`** (el raw, tal cual):
+
+```markdown
+## Ventas
+
+|  | A | B | C | D |
+| --- | --- | --- | --- | --- |
+| 1 | <!--A1--> Producto | <!--B1--> Ene | <!--C1--> Feb | <!--D1--> Total |
+| 2 | <!--A2--> Café | <!--B2--> 10 | <!--C2--> 12 | <!--D2--> 22 (=SUM(B2:C2)) |
+| 3 | <!--A3--> Té | <!--B3--> 5 | <!--C3--> 8 | <!--D3--> 13 (=SUM(B3:C3)) |
+| 4 | <!--A4--> Total | <!--B4--> 15 (=SUM(B2:B3)) | <!--C4--> 20 (=SUM(C2:C3)) | <!--D4--> 35 (=SUM(D2:D3)) |
+```
+
+Cada celda calculada conserva su **fórmula junto al valor** (`22 (=SUM(B2:C2))`),
+la rejilla da las **coordenadas** (`D` por fila, `4` por columna) y el comentario
+`<!--D2-->` permite **ubicar la celda** desde un agente. Al renderizar, los
+comentarios se ocultan y se ve una tabla normal. ¿Quieres la salida más limpia?
+
+```bash
+excel2md ventas.xlsx --sin-coordenadas --sin-ref-celdas
+```
+
+```markdown
+## Ventas
+
+| Producto | Ene | Feb | Total |
+| --- | --- | --- | --- |
+| Café | 10 | 12 | 22 (=SUM(B2:C2)) |
+| Té | 5 | 8 | 13 (=SUM(B3:C3)) |
+| Total | 15 (=SUM(B2:B3)) | 20 (=SUM(C2:C3)) | 35 (=SUM(D2:D3)) |
+```
+
 ## 🤔 ¿Por qué existe este paquete?
 
 Necesitaba pasar hojas de Excel a Markdown para dárselas como contexto a un LLM,
