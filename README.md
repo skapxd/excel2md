@@ -10,6 +10,12 @@ A diferencia de la mayoría de conversores (que aplanan cada fórmula a su valor
 `excel2md` preserva la lógica de cálculo de la hoja y la hace **rastreable**,
 ideal para documentación y **contexto de IA**.
 
+> **No es solo un conversor.** Este README también incluye una
+> [**guía para agentes**](#-para-agentes-cómo-buscar-en-el-markdown) con
+> herramientas de terminal (`grep`, `ripgrep`, `awk`) para que un agente
+> **siga las referencias de las fórmulas** —celda a celda e incluso **entre
+> hojas**— en hojas de cálculo complejas, sin cargar todo el archivo al contexto.
+
 - **Fórmulas:** cada celda calculada se muestra como `valor (=FORMULA)`.
 - **Coordenadas:** rejilla con columnas `A, B, C…` y números de fila de Excel, para
   que referencias como `=PMT(D24/12,I18,…)` se puedan seguir. Se activa
