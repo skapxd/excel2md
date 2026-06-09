@@ -5,6 +5,17 @@ Todas las novedades relevantes de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
+## [1.4.1] - 2026-06-09
+
+### Documentation
+
+- Guía para agentes: receta para **buscar una celda por su nombre**
+  (`grep '<!--Rate-->'`) y cómo limpiar el valor cuando una celda nombrada trae
+  el segundo comentario.
+- Corregido el comando `cells()` de clasificación para que **descarte el
+  comentario de nombre** antes de clasificar; si no, una celda nombrada con valor
+  numérico se clasificaba mal como texto.
+
 ## [1.4.0] - 2026-06-09
 
 ### Added
@@ -115,6 +126,7 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
   `--formato-excel`.
 - CLI `excel2md` y API de librería `convert()` / `convertWorkbook()`.
 
+[1.4.1]: https://github.com/skapxd/excel2md/releases/tag/v1.4.1
 [1.4.0]: https://github.com/skapxd/excel2md/releases/tag/v1.4.0
 [1.3.0]: https://github.com/skapxd/excel2md/releases/tag/v1.3.0
 [1.2.1]: https://github.com/skapxd/excel2md/releases/tag/v1.2.1

@@ -1,6 +1,6 @@
 {
   "name": "@skapxd/excel2md",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Convert Excel (.xlsx/.xlsm) to Markdown preserving formulas and cell coordinates",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
