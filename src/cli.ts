@@ -26,6 +26,7 @@ program
   .option('--sin-coordenadas', 'Nunca mostrar coordenadas (primera fila como header)')
   .option('--formato-excel', 'Usar el texto formateado de Excel en vez del valor crudo')
   .option('--sin-ref-celdas', 'No embeber la coordenada A1 de cada celda (por defecto se embebe en <!--B2-->)')
+  .option('--sin-deps', 'No anteponer el resumen del grafo de dependencias (por defecto se antepone)')
   .action((file: string, options) => {
     let coords: boolean | null = null;
     if (options.coordenadas) coords = true;
@@ -36,6 +37,7 @@ program
       coords,
       excelFormat: Boolean(options.formatoExcel),
       cellRefs: !options.sinRefCeldas,
+      deps: !options.sinDeps,
     };
 
     let md: string;

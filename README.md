@@ -16,6 +16,9 @@ ideal para documentación y **contexto de IA**.
 > **siga las referencias de las fórmulas** —celda a celda e incluso **entre
 > hojas**— en hojas de cálculo complejas, sin cargar todo el archivo al contexto.
 
+- **🔗 Resumen de dependencias:** al inicio del `.md`, un mapa `Celda <- dependencias`
+  agrupado por hoja. Un agente lo carga **primero** y sabe navegar el resto sin
+  leer todo el archivo (`--sin-deps` para omitirlo).
 - **Fórmulas:** cada celda calculada se muestra como `valor (=FORMULA)`.
 - **Coordenadas:** rejilla con columnas `A, B, C…` y números de fila de Excel, para
   que referencias como `=PMT(D24/12,I18,…)` se puedan seguir. Se activa
@@ -36,9 +39,26 @@ ideal para documentación y **contexto de IA**.
 | **3** | Té       | 5           | 8           | `=SUM(B3:C3)` |
 | **4** | Total    | `=SUM(B2:B3)` | `=SUM(C2:C3)` | `=SUM(D2:D3)` |
 
-**Lo que genera `excel2md ventas.xlsx`** (el raw, tal cual):
+**Lo que genera `excel2md ventas.xlsx`** (el raw, tal cual — primero el resumen de
+dependencias, luego las tablas):
 
-```markdown
+~~~markdown
+## 🔗 Dependencias (resumen)
+
+> Mapa de qué celda depende de cuál. Cárgalo primero para navegar el resto del
+> archivo sin leerlo entero. Formato `Celda <- dependencias`; las de otra hoja
+> van como `'Hoja'!Celda`, y `⟲` marca una dependencia circular real.
+
+```text
+# Ventas
+D2 <- B2:C2
+D3 <- B3:C3
+B4 <- B2:B3
+C4 <- C2:C3
+D4 <- D2:D3
+```
+---
+
 ## Ventas
 
 |  | A | B | C | D |
@@ -47,7 +67,11 @@ ideal para documentación y **contexto de IA**.
 | 2 | <!--A2--> Café | <!--B2--> 10 | <!--C2--> 12 | <!--D2--> 22 (=SUM(B2:C2)) |
 | 3 | <!--A3--> Té | <!--B3--> 5 | <!--C3--> 8 | <!--D3--> 13 (=SUM(B3:C3)) |
 | 4 | <!--A4--> Total | <!--B4--> 15 (=SUM(B2:B3)) | <!--C4--> 20 (=SUM(C2:C3)) | <!--D4--> 35 (=SUM(D2:D3)) |
-```
+~~~
+
+El bloque `🔗 Dependencias` es la pieza clave para un agente: `D4 <- D2:D3` y
+`D2 <- B2:C2` le dicen que el gran total depende de los subtotales, que dependen
+de los datos de entrada — **sin haber leído las tablas todavía**.
 
 Cada celda calculada conserva su **fórmula junto al valor** (`22 (=SUM(B2:C2))`),
 la rejilla da las **coordenadas** (`D` por fila, `4` por columna) y el comentario
@@ -154,6 +178,7 @@ excel2md archivo.xlsx -o salida.md
 | `--sin-coordenadas` | Nunca mostrar coordenadas (la primera fila se usa como header). |
 | `--formato-excel` | Usar el texto formateado de Excel (`1.00%`, `Apr-24`) en vez del valor crudo (`0.01`). |
 | `--sin-ref-celdas` | Desactiva el comentario de coordenada A1 por celda (`<!--B2-->`), que viene **activado por defecto**. |
+| `--sin-deps` | Omite el resumen del grafo de dependencias del inicio, que viene **activado por defecto**. |
 
 ## 📦 Uso como librería
 
@@ -295,6 +320,16 @@ búsqueda para seguir el cálculo de hoja en hoja. Para listar todas las hojas:
 `grep -E '^## ' archivo.md`.
 
 ### Playbook: clasificar celdas y reconstruir el grafo de dependencias
+
+> 💡 El grafo de dependencias **ya viene incluido por defecto** al inicio del
+> `.md` (sección `## 🔗 Dependencias (resumen)`), calificado por hoja, con rangos
+> y detección de ciclos reales. Cárgalo primero —es la forma recomendada—. Lo de
+> abajo es para **profundizar**, hacer consultas a medida, o procesar un archivo
+> generado con `--sin-deps`. Para extraer solo el resumen:
+>
+> ```bash
+> sed -n '/^## 🔗 Dependencias/,/^---$/p' archivo.md
+> ```
 
 En vez de leer todo el `.md`, un agente puede ejecutar estos comandos **en orden**
 para entender la hoja y de qué depende cada cálculo.

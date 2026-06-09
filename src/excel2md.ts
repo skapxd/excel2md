@@ -9,6 +9,8 @@ const XLSX = (
     : (XLSXStar as unknown as { default: typeof XLSXStar }).default
 ) as typeof XLSXStar;
 
+import { dependencySummary } from './deps';
+
 /** Subconjunto tipado de XLSX.SSF (no siempre expuesto en los tipos). */
 const SSF = (XLSX as unknown as {
   SSF: {
@@ -35,6 +37,13 @@ export interface ConvertOptions {
    * @default false
    */
   excelFormat?: boolean;
+  /**
+   * Anteponer un resumen del grafo de dependencias (`Celda <- dependencias`)
+   * agrupado por hoja, para que un agente sepa navegar sin leer todo el archivo.
+   * Activado por defecto; pásalo en `false` para omitirlo.
+   * @default true
+   */
+  deps?: boolean;
   /**
    * Añade en cada celda no vacía un comentario HTML con su coordenada A1
    * (p. ej. ` <!--B2-->`). Los renderizadores lo ocultan; un agente puede leerlo
@@ -182,6 +191,12 @@ export function convertWorkbook(wb: XLSXStar.WorkBook, options: ConvertOptions =
   const coordMode = options.coords ?? null;
 
   const parts: string[] = [];
+
+  // Resumen del grafo de dependencias al inicio (activado por defecto).
+  if (options.deps !== false) {
+    const summary = dependencySummary(wb);
+    if (summary) parts.push(summary.trimEnd(), '---\n');
+  }
   for (const name of wb.SheetNames) {
     const ws = wb.Sheets[name];
     if (!ws) continue;

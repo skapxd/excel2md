@@ -5,6 +5,23 @@ Todas las novedades relevantes de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
+## [1.2.0] - 2026-06-09
+
+### Added
+
+- **Resumen del grafo de dependencias** al inicio del Markdown, **activado por
+  defecto** (`--sin-deps` / opción `deps` para omitirlo). Agrupa por hoja un mapa
+  `Celda <- dependencias` que:
+  - **califica** las referencias entre hojas (`'Hoja'!Celda`),
+  - **preserva los rangos** (`A1:B3`) sin expandirlos,
+  - **detecta dependencias circulares reales** (`⟲`) con DFS — y al calificar por
+    hoja elimina los falsos ciclos que produce el análisis con shell.
+
+  Pensado para que un agente cargue solo ese mapa y navegue el resto del archivo
+  sin leerlo entero.
+- API pública: `dependencySummary(workbook)` y opción `ConvertOptions.deps`.
+- Guía para agentes ampliada: cómo extraer el resumen (`sed`) y profundizar.
+
 ## [1.1.1] - 2026-06-09
 
 ### Documentation
@@ -61,6 +78,7 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
   `--formato-excel`.
 - CLI `excel2md` y API de librería `convert()` / `convertWorkbook()`.
 
+[1.2.0]: https://github.com/skapxd/excel2md/releases/tag/v1.2.0
 [1.1.1]: https://github.com/skapxd/excel2md/releases/tag/v1.1.1
 [1.1.0]: https://github.com/skapxd/excel2md/releases/tag/v1.1.0
 [1.0.0]: https://github.com/skapxd/excel2md/releases/tag/v1.0.0

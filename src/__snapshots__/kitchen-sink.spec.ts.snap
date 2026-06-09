@@ -1,7 +1,22 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`kitchen-sink (golden snapshot) > --formato-excel — texto formateado de Excel 1`] = `
-"## Cotiz
+"## 🔗 Dependencias (resumen)
+
+> Mapa de qué celda depende de cuál. Cárgalo primero para navegar el resto del
+> archivo sin leerlo entero. Formato \`Celda <- dependencias\`; las de otra hoja
+> van como \`'Hoja'!Celda\`, y \`⟲\` marca una dependencia circular real.
+
+\`\`\`text
+# Cotiz
+B4 <- B2 B3
+B5 <- B2 B3
+B8 <- B2
+B10 <- Aux!A1
+\`\`\`
+---
+
+## Cotiz
 
 |  | A | B | D |
 | --- | --- | --- | --- |
@@ -31,7 +46,22 @@ _(hoja vacía)_
 `;
 
 exports[`kitchen-sink (golden snapshot) > --sin-coordenadas — primera fila como header 1`] = `
-"## Cotiz
+"## 🔗 Dependencias (resumen)
+
+> Mapa de qué celda depende de cuál. Cárgalo primero para navegar el resto del
+> archivo sin leerlo entero. Formato \`Celda <- dependencias\`; las de otra hoja
+> van como \`'Hoja'!Celda\`, y \`⟲\` marca una dependencia circular real.
+
+\`\`\`text
+# Cotiz
+B4 <- B2 B3
+B5 <- B2 B3
+B8 <- B2
+B10 <- Aux!A1
+\`\`\`
+---
+
+## Cotiz
 
 | <!--A1--> Concepto | <!--B1--> Monto | <!--D1--> Nota |
 | --- | --- | --- |
@@ -60,7 +90,22 @@ _(hoja vacía)_
 `;
 
 exports[`kitchen-sink (golden snapshot) > --sin-ref-celdas — sin comentarios de coordenada 1`] = `
-"## Cotiz
+"## 🔗 Dependencias (resumen)
+
+> Mapa de qué celda depende de cuál. Cárgalo primero para navegar el resto del
+> archivo sin leerlo entero. Formato \`Celda <- dependencias\`; las de otra hoja
+> van como \`'Hoja'!Celda\`, y \`⟲\` marca una dependencia circular real.
+
+\`\`\`text
+# Cotiz
+B4 <- B2 B3
+B5 <- B2 B3
+B8 <- B2
+B10 <- Aux!A1
+\`\`\`
+---
+
+## Cotiz
 
 |  | A | B | D |
 | --- | --- | --- | --- |
@@ -90,7 +135,22 @@ _(hoja vacía)_
 `;
 
 exports[`kitchen-sink (golden snapshot) > --solo-valores — sin fórmulas 1`] = `
-"## Cotiz
+"## 🔗 Dependencias (resumen)
+
+> Mapa de qué celda depende de cuál. Cárgalo primero para navegar el resto del
+> archivo sin leerlo entero. Formato \`Celda <- dependencias\`; las de otra hoja
+> van como \`'Hoja'!Celda\`, y \`⟲\` marca una dependencia circular real.
+
+\`\`\`text
+# Cotiz
+B4 <- B2 B3
+B5 <- B2 B3
+B8 <- B2
+B10 <- Aux!A1
+\`\`\`
+---
+
+## Cotiz
 
 |  | A | B | D |
 | --- | --- | --- | --- |
@@ -120,7 +180,22 @@ _(hoja vacía)_
 `;
 
 exports[`kitchen-sink (golden snapshot) > default — fórmulas + coordenadas auto + valor crudo 1`] = `
-"## Cotiz
+"## 🔗 Dependencias (resumen)
+
+> Mapa de qué celda depende de cuál. Cárgalo primero para navegar el resto del
+> archivo sin leerlo entero. Formato \`Celda <- dependencias\`; las de otra hoja
+> van como \`'Hoja'!Celda\`, y \`⟲\` marca una dependencia circular real.
+
+\`\`\`text
+# Cotiz
+B4 <- B2 B3
+B5 <- B2 B3
+B8 <- B2
+B10 <- Aux!A1
+\`\`\`
+---
+
+## Cotiz
 
 |  | A | B | D |
 | --- | --- | --- | --- |
