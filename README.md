@@ -73,6 +73,33 @@ El bloque `🔗 Dependencias` es la pieza clave para un agente: `D4 <- D2:D3` y
 `D2 <- B2:C2` le dicen que el gran total depende de los subtotales, que dependen
 de los datos de entrada — **sin haber leído las tablas todavía**.
 
+### Cómo leer el grafo
+
+La flecha **`<-` se lee "depende de"** (o "se calcula a partir de"). A la izquierda
+va la celda con fórmula; a la derecha, las celdas que necesita.
+
+| Línea | Se lee | En la tabla |
+| --- | --- | --- |
+| `D2 <- B2:C2` | D2 depende de B2 y C2 | `22 = 10 + 12` (total de la fila Café) |
+| `B4 <- B2:B3` | B4 depende de B2 y B3 | `15 = 10 + 5` (total de la columna Ene) |
+| `D4 <- D2:D3` | D4 depende de D2 y D3 | `35 = 22 + 13` (gran total) |
+
+Espacialmente: la **columna `D`** son sumas horizontales (total por fila), la
+**fila `4`** son sumas verticales (total por columna), y **`D4`** es la suma de
+las sumas.
+
+Las celdas que **nunca aparecen a la izquierda de `<-`** (`B2 C2 B3 C3`) son las
+**entradas**: los datos crudos. Todo lo demás se calcula a partir de ellas. Así, un
+agente sigue las flechas hacia atrás para llegar al origen de cualquier resultado:
+
+```text
+D4 (35)
+ ├─ D2 (22) ─┬─ B2 (10)   ← entrada
+ │           └─ C2 (12)   ← entrada
+ └─ D3 (13) ─┬─ B3 (5)    ← entrada
+             └─ C3 (8)    ← entrada
+```
+
 Cada celda calculada conserva su **fórmula junto al valor** (`22 (=SUM(B2:C2))`),
 la rejilla da las **coordenadas** (`D` por fila, `4` por columna) y el comentario
 `<!--D2-->` permite **ubicar la celda** desde un agente. Al renderizar, los
